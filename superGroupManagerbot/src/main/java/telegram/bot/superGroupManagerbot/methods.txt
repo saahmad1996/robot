@@ -1,0 +1,944 @@
+package telegram.bot.first1;
+
+import com.google.common.io.Files;
+import com.mysql.jdbc.Connection;
+import com.mysql.jdbc.Statement;
+
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import javax.swing.text.View;
+
+import static java.lang.Math.toIntExact;
+
+import org.telegram.telegrambots.api.methods.BotApiMethod;
+import org.telegram.telegrambots.api.methods.groupadministration.GetChatAdministrators;
+import org.telegram.telegrambots.api.methods.groupadministration.GetChatMember;
+import org.telegram.telegrambots.api.methods.groupadministration.GetChatMemberCount;
+import org.telegram.telegrambots.api.methods.groupadministration.KickChatMember;
+import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.api.methods.send.SendVideo;
+import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.api.objects.Audio;
+import org.telegram.telegrambots.api.objects.CallbackQuery;
+import org.telegram.telegrambots.api.objects.Chat;
+import org.telegram.telegrambots.api.objects.ChatMember;
+import org.telegram.telegrambots.api.objects.Contact;
+import org.telegram.telegrambots.api.objects.Document;
+import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.MessageEntity;
+import org.telegram.telegrambots.api.objects.PhotoSize;
+import org.telegram.telegrambots.api.objects.Sticker;
+import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.api.objects.User;
+import org.telegram.telegrambots.api.objects.Venue;
+import org.telegram.telegrambots.api.objects.Video;
+import org.telegram.telegrambots.api.objects.Voice;
+import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardRemove;
+import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
+import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
+import org.telegram.telegrambots.updateshandlers.SentCallback;
+
+import com.sun.research.ws.wadl.Method;
+import com.vdurmont.emoji.EmojiParser;
+
+public class AllExampleBot extends TelegramLongPollingBot {
+
+	public void onUpdateReceived(Update update) {
+		// MyAmazingBot();
+		// lesson1(update);
+
+		// PhotoBot();
+		// lesson2(update);
+
+		// LoggingTestBot();
+		// lesson3(update);
+
+		// EmojiTestBot();
+		// lesson4(update);
+		// lesson5 is deploy
+		// BotApi20();
+		// lesson6(update);
+
+		// datebaes
+		// lesson7(update);
+
+		// example(update);
+
+		sizeBot(update);
+
+	}
+
+	private void sizeBot(Update update) {
+		// TODO Auto-generated method stub
+		if (update.hasMessage()) {
+			Message message = update.getMessage();
+			Long chatId = message.getChatId();
+			Chat chat = message.getChat();
+
+			Boolean userChat = chat.isUserChat();
+			if (userChat) {
+
+				String text = message.getText();
+				if (message.hasText()) {
+					if (message.getText().equals("/start")) {
+
+					} else if (message.getText().equals("/get")) {
+						getAllFile(update);
+					} else {
+						getFileSize(update);
+					}
+				}
+			} else {
+				if (message.hasText()) {
+					if (message.isReply() && message.isCommand()) {
+
+						if (message.getText().equals("/ban")) {
+						}
+						if (message.getText().equals("/ban")) {
+							User from = message.getReplyToMessage().getFrom();
+							Integer id = from.getId();
+							KickChatMember kickChatMember = new KickChatMember()
+									.setChatId(message.getChatId()).setUserId(
+											id);
+							try {
+								Boolean kickMember = kickMember(kickChatMember);
+							} catch (TelegramApiException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						} else if (message.getText().equals("/member")) {
+							// Long id = update.getMessage().getChat().getId();
+							// System.out.println(id);
+							GetChatMemberCount getChatMemberCount = new GetChatMemberCount()
+									.setChatId(message.getChatId());
+							try {
+								Integer chatMemberCount = getChatMemberCount(getChatMemberCount);
+								
+							} catch (TelegramApiException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							//
+							// GetChatMember getChatMember = new
+							// GetChatMember().setChatId(message.getChatId()).setUserId(i);
+							// try {
+							// ChatMember chatMember =
+							// getChatMember(getChatMember);
+							//
+							// } catch (TelegramApiException e) {
+							//
+						}
+					} else if (message.getText().equals("/admin")) {
+						GetChatAdministrators getChatAdministrators = new GetChatAdministrators()
+								.setChatId(message.getChatId());
+						try {
+							List<ChatMember> chatAdministrators = getChatAdministrators(getChatAdministrators);
+							for (ChatMember chatMember : chatAdministrators) {
+								String userName = chatMember.getUser()
+										.getUserName();
+								System.out.println(userName + ":"
+										+ chatMember.getUser().getId());
+
+							}
+						} catch (TelegramApiException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					} else if (message.getText().startsWith("/change ")) {
+						String[] split = message.getText().split(" ");
+						String str = "";
+						for (String string : split) {
+
+							str += " " + string;
+
+						}
+						try {
+							Long migrateToChatId = message.getReplyToMessage()
+									.getMigrateToChatId();
+							System.out.println(migrateToChatId);
+							EditMessageText editMessage = new EditMessageText()
+									.setChatId(message.getChatId())
+									.setText(str)
+									.setMessageId(
+											message.getReplyToMessage()
+													.getMessageId());
+							editMessageText(editMessage);
+
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+					} else if (message.getText().equals("/size")) {
+						getFileSize(update);
+					} else if (message.getText().equals("/get")) {
+						getAllFile(update);
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+
+	private void getAllFile(Update update) {
+		// TODO Auto-generated method stub
+		Message message = update.getMessage();
+		Message replyToMessage = update.getMessage().getReplyToMessage();
+		String str = "";
+		getDBFile();
+		// try {
+		// SendMessage sendMessage = new SendMessage();
+		// sendMessage(sendMessage);
+		// } catch (TelegramApiException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+
+	}
+
+	private void getDBFile() {
+		// db
+		Connection conn = null;
+		Statement stmt = null;
+
+		String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+		String DB_URL = "jdbc:mysql://localhost/tele_bot";
+
+		// Database credentials
+		String USER = "root";
+		String PASS = "";
+
+		try {
+			System.out.println("4444444444444444444444444444444444");
+			Class.forName(JDBC_DRIVER);
+			System.out.println("3333333333333333333333333333333");
+
+			conn = (Connection) DriverManager.getConnection(DB_URL, USER, PASS);
+			System.out.println("222222222222222222222222222222222222222222222");
+
+			stmt = (Statement) conn.createStatement();
+			System.out.println("11111111111111111111111111111111");
+
+			String sql = "SELECT file_id,file_type FROM file ;";
+			ResultSet rs = stmt.executeQuery(sql);
+			System.out.println(rs.toString());
+			while (rs.next()) {
+				String file_id = rs.getNString("file_id");
+				String file_type = rs.getNString("file_type");
+				System.out.println(file_id + ":" + file_type);
+			}
+
+			stmt.close();
+			conn.close();
+
+		} catch (Exception e) {
+		}
+
+	}
+
+	private void getFileSize(Update update) {
+		// TODO Auto-generated method stub
+		Message message = update.getMessage();
+		Message replyToMessage = message.getReplyToMessage();
+		Integer fileSize = 0;
+		String fileId = "";
+		String mimeType = "";
+		String fileName = "";
+		if (replyToMessage == null) {
+			replyToMessage = message;
+		}
+
+		String str = "" + replyToMessage.getMessageId();
+
+		if (replyToMessage.hasDocument()) {
+			Document document = replyToMessage.getDocument();
+			fileSize = document.getFileSize();
+			fileId = document.getFileId();
+			fileName = document.getFileName();
+			mimeType = document.getMimeType();
+			// PhotoSize thumb = document.getThumb();
+			// if (thumb.hasFilePath()) {
+			// System.out.println("aaaaaaaaaaaaaaaaaaa sd "+thumb.getFilePath());
+			// }
+			// System.out.println(thumb.toString());
+
+		} else if (replyToMessage.hasPhoto()) {
+
+			List<PhotoSize> photos = replyToMessage.getPhoto();
+			PhotoSize orElse = photos
+					.stream()
+					.sorted(Comparator.comparing(PhotoSize::getFileSize)
+							.reversed()).findFirst().orElse(null);
+
+			fileId = orElse.getFileId();
+			fileSize = orElse.getFileSize();
+			fileId = orElse.getFileId();
+
+			fileName = "Photo";
+			mimeType = fileName;
+
+			str += "\nwidth: " + orElse.getHeight();
+			str += "\nheight: " + orElse.getWidth();
+
+		} else if (replyToMessage.getVideo() != null) {
+			Video video = replyToMessage.getVideo();
+
+			// fileId = video.getFileId();
+			// fileSize = video.getFileSize();
+			PhotoSize thumb = video.getThumb();
+
+			mimeType = video.getMimeType();
+			fileSize = video.getFileSize();
+			fileId = video.getFileId();
+
+			fileName = "Video";
+			mimeType = fileName;
+
+			int s = video.getDuration();
+			str += "\nduration: " + ((s / 60) + ":" + (s % 60));
+
+			str += "\nwidth: " + video.getWidth();
+			str += "\nheight: " + video.getHeight();
+
+		} else if (replyToMessage.getSticker() != null) {
+			Sticker sticker = replyToMessage.getSticker();
+
+			fileSize = sticker.getFileSize();
+			fileId = sticker.getFileId();
+
+			fileName = "Sticker";
+			mimeType = fileName;
+
+			// str+="\nemoji:"+sticker.getEmoji();
+			str += "\nwidth: " + sticker.getWidth();
+			str += "\nheight: " + sticker.getHeight();
+
+		} else if (replyToMessage.getAudio() != null) {
+			Audio audio = replyToMessage.getAudio();
+
+			System.out.println(audio.getPerformer());
+
+			fileSize = audio.getFileSize();
+			fileId = audio.getFileId();
+			fileName = audio.getTitle();
+			mimeType = audio.getMimeType();
+
+			int s = audio.getDuration();
+			str += "\nduration: " + ((s / 60) + ":" + (s % 60));
+
+		} else if (replyToMessage.getVoice() != null) {
+			Voice voice = replyToMessage.getVoice();
+
+			fileSize = voice.getFileSize();
+			fileId = voice.getFileId();
+			fileName = replyToMessage.getFrom().getFirstName();
+			mimeType = "Voice";
+
+			int s = voice.getDuration();
+			str += "\nduration: " + ((s / 60) + ":" + (s % 60));
+
+		} else if (replyToMessage.getContact() != null) {
+			Contact contact = replyToMessage.getContact();
+			String phoneNumber = contact.getPhoneNumber();
+
+			fileId = phoneNumber;
+
+			fileName = "" + contact.getUserID() + "/"
+			/*
+			 * + ((contact.getLastName() != null || contact.getLastName()
+			 * .length() > 0) ? ">Last:" + contact.getLastName() : "") +
+			 */+ "";
+			mimeType = "Contact";
+
+		}
+		if (fileId.length() > 0 && fileName.length() > 0) {
+			boolean checkFile = checkFile(fileId);
+			if (!checkFile) {
+				addFile(fileId, fileName, mimeType);
+			}
+		}
+
+		String size = calcFileSize(fileSize);
+		str += size;
+
+		try {
+			SendMessage sendMessage = new SendMessage()
+					.setChatId(message.getChatId()).setText(str)
+					.setReplyToMessageId(replyToMessage.getMessageId());
+
+			sendMessage(sendMessage);
+		} catch (TelegramApiException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+	}
+
+	private boolean checkFile(String fileId) {
+		// db
+		Connection conn = null;
+		Statement stmt = null;
+
+		String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+		String DB_URL = "jdbc:mysql://localhost/tele_bot";
+
+		// Database credentials
+		String USER = "root";
+		String PASS = "";
+
+		boolean result = false;
+
+		try {
+			Class.forName(JDBC_DRIVER);
+
+			conn = (Connection) DriverManager.getConnection(DB_URL, USER, PASS);
+
+			stmt = (Statement) conn.createStatement();
+
+			String sql;
+			sql = "SELECT * FROM `file` WHERE `file_id` = '" + fileId + "';";
+			ResultSet rs = stmt.executeQuery(sql);
+			fw: while (rs.next()) {
+				result = true;
+				break fw;
+			}
+
+			stmt.close();
+			conn.close();
+
+		} catch (Exception e) {
+		}
+		return result;
+
+	}
+
+	private String calcFileSize(Integer fileSize) {
+		DecimalFormat df = new DecimalFormat("#.00");
+		return "\nsize\nbyte: " + fileSize + "\nkB: "
+				+ df.format((double) (fileSize / 1024.0)) + "\nmB: "
+				+ df.format((double) (fileSize / 1048576.0));
+	}
+
+	static boolean addFile(String file_id, String file_name, String file_type) {
+		// db
+		Connection conn = null;
+		Statement stmt = null;
+
+		String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+		String DB_URL = "jdbc:mysql://localhost/tele_bot";
+
+		// Database credentials
+		String USER = "root";
+		String PASS = "";
+
+		boolean result = false;
+
+		try {
+			Class.forName(JDBC_DRIVER);
+
+			conn = (Connection) DriverManager.getConnection(DB_URL, USER, PASS);
+
+			stmt = (Statement) conn.createStatement();
+
+			String sql;
+			sql = "INSERT INTO `file` (`id`, `file_id`, `file_name`, `file_type`) VALUES (NULL, '"
+					+ file_id + "', '" + file_name + "', '" + file_type + "');";
+			int rs = stmt.executeUpdate(sql);
+			if (rs > 0) {
+				result = true;
+			}
+			// while (rs.next()) {
+			//
+			// }
+
+			stmt.close();
+			conn.close();
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return result;
+	}
+
+	private void example(Update update) {
+
+		// TODO Auto-generated method stub
+
+		if (update.hasMessage()) {
+
+			Message message = update.getMessage();
+			Long chatId = message.getChatId();
+			Chat chat = message.getChat();
+			String userName = chat.getUserName();
+			System.out.println(chat.getTitle());
+
+			boolean command = message.isCommand();
+			boolean reply = message.isReply();
+			boolean userMessage = message.isUserMessage();
+			// System.out.println(command+" > "+reply+" > "+userMessage);
+			String str = message.getMessageId() + " > " + message.getText();
+			if (reply) {
+				Message replyToMessage = message.getReplyToMessage();
+				str += " " + replyToMessage.getText() + " "
+						+ replyToMessage.getMessageId();
+
+				// System.out.println(date+" > "+replyToMessage.getMessageId());
+			}
+			try {
+				SendMessage sendMessage = new SendMessage()
+						.setChatId(message.getChatId()).setText("hhh")
+						.setReplyToMessageId(message.getMessageId());
+				sendMessage(sendMessage);
+			} catch (TelegramApiException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			System.out.println(str);
+			// EditMessageText editMessageText = new EditMessageText();
+			// editMessageText.setMessageId(16)
+			// .setChatId(message.getChatId()).setText("hahahahah");
+			//
+			// try {
+			// editMessageText(editMessageText);
+			// } catch (TelegramApiException e1) {
+			// // TODO Auto-generated catch block
+			// e1.printStackTrace();
+			// }
+
+			// if (message.hasDocument()) {
+			// }else if(message.hasPhoto()){
+			//
+			// }else if(message.hasEntities()){
+			//
+			// }else if(message.hasPhoto()){
+			//
+			// }
+
+		}
+
+	}
+
+	private void video(Update update) {
+		// TODO Auto-generated method stub
+		try {
+			Video video = update.getMessage().getVideo();
+			String str = video.getFileId() + "\n > " + video.getFileSize()
+					+ "\n > " + video.getHeight() + "\n > " + video.getWidth()
+					+ "\n > " + video.getMimeType() + "\n > "
+					+ video.getThumb();
+			System.out.println(str);
+			// Integer fileSize = update.getMessage().getVideo().getFileSize();
+			// System.out.println(">>>>>>>>>>>>>>>>>>>> " + fileSize
+			// + " <<<<<<<<<<<<<<<<<<<<<");
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+
+	private void entity(Update update) {
+		// TODO Auto-generated method stub
+		try {
+			List<MessageEntity> entities = update.getMessage().getEntities();
+			int i = 0;
+			for (MessageEntity messageEntity : entities) {
+				System.out.println(i + " : " + messageEntity.getLength()
+						+ " : " + messageEntity.getOffset() + " : "
+						+ messageEntity.getText() + " : "
+						+ messageEntity.getType() + " : "
+						+ messageEntity.getUrl() + " : "
+						+ messageEntity.getUser());
+				i++;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+
+	private void document(Update update) {
+		// TODO Auto-generated method stub
+
+		try {
+			Document document = update.getMessage().getDocument();
+			update.getMessage().getDocument().getThumb().getFileId();
+
+			// .stream().sorted(Comparator.comparing(PhotoSize::getFileSize).reversed()).findFirst().orElse(null).getFileId();
+			String str = document.getFileId() + "\n > "
+					+ document.getFileName() + "\n > " + document.getFileSize()
+					+ "\n > " + document.getMimeType() + "\n > "
+					+ document.getThumb();
+			System.out.println(str);
+			if (str.contains(" > video/mp4\n >")) {
+
+				SendVideo msg = new SendVideo()
+						.setChatId(update.getMessage().getChatId())
+						.setVideo(document.getThumb().getFileId())
+						.setCaption(str);
+				try {
+					sendVideo(msg); // Call method to send the message
+				} catch (TelegramApiException e) {
+					e.printStackTrace();
+				}
+			}
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+
+	}
+
+	private void lesson7(Update update) {
+		// TODO Auto-generated method stub
+		// import com.mongodb.MongoClient;
+		// import com.mongodb.MongoClientURI;
+		// import com.mongodb.client.MongoCollection;
+		// import com.mongodb.client.MongoDatabase;
+		// import org.bson.Document;
+		// import org.json.JSONObject;
+		// import static java.lang.Math.toIntExact;
+		//
+		// // Set variables
+		// String user_first_name =
+		// update.getMessage().getChat().getFirstName();
+		// String user_last_name = update.getMessage().getChat().getLastName();
+		// String user_username = update.getMessage().getChat().getUserName();
+		// long user_id = update.getMessage().getChat().getId();
+		// String message_text = update.getMessage().getText();
+		// long chat_id = update.getMessage().getChatId();
+		//
+		// try {
+		// sendMessage(message);
+		// check(user_first_name, user_last_name, toIntExact(user_id),
+		// user_username);
+		// } catch (TelegramApiException e) {
+		// e.printStackTrace();
+		// }
+		//
+		// private String check(String first_name, String last_name, int
+		// user_id, String username) {
+		// // Set loggers
+		// java.util.logging.Logger.getLogger("org.mongodb.driver").setLevel(Level.OFF);
+		// MongoClientURI connectionString = new
+		// MongoClientURI("mongodb://host:port");
+		// MongoClient mongoClient = new MongoClient(connectionString);
+		// MongoDatabase database = mongoClient.getDatabase("db_name");
+		// MongoCollection<Document> collection =
+		// database.getCollection("users");
+		// long found = collection.count(Document.parse("{id : " +
+		// Integer.toString(user_id) + "}"));
+		// if (found == 0) {
+		// Document doc = new Document("first_name", first_name)
+		// .append("last_name", last_name)
+		// .append("id", user_id)
+		// .append("username", username);
+		// collection.insertOne(doc);
+		// mongoClient.close();
+		// System.out.println("User not exists in database. Written.");
+		// return "no_exists";
+		// } else {
+		// System.out.println("User exists in database.");
+		// mongoClient.close();
+		// return "exists";
+		// }
+		//
+		//
+		// }
+
+	}
+
+	private void lesson6(Update update) {
+		// TODO Auto-generated method stub
+		// We check if the update has a message and the message has text
+		if (update.hasMessage() && update.getMessage().hasText()) {
+			String message_text = update.getMessage().getText();
+			long chat_id = update.getMessage().getChatId();
+			if (update.getMessage().getText().equals("/start")) {
+
+				SendMessage message = new SendMessage() // Create a message
+														// object object
+						.setChatId(chat_id).setText("You send /start");
+
+				InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+				List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+				List<InlineKeyboardButton> rowInline = new ArrayList<>();
+				rowInline.add(new InlineKeyboardButton().setText(
+						"Update message text").setCallbackData(
+						"update_msg_text"));
+				// Set the keyboard to the markup
+				rowsInline.add(rowInline);
+				// Add it to the message
+				markupInline.setKeyboard(rowsInline);
+				message.setReplyMarkup(markupInline);
+				try {
+					sendMessage(message); // Sending our message object to user
+				} catch (TelegramApiException e) {
+					e.printStackTrace();
+				}
+			} else {
+
+			}
+
+		} else if (update.hasCallbackQuery()) {
+			// Set variables
+			String call_data = update.getCallbackQuery().getData();
+			long message_id = update.getCallbackQuery().getMessage()
+					.getMessageId();
+			long chat_id = update.getCallbackQuery().getMessage().getChatId();
+
+			if (call_data.equals("update_msg_text")) {
+				String answer = "Updated message text";
+				EditMessageText new_message = new EditMessageText()
+						.setChatId(chat_id)
+						.setMessageId(toIntExact(message_id)).setText(answer);
+				try {
+
+					editMessageText(new_message);
+				} catch (TelegramApiException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private void lesson4(Update update) {
+		// TODO Auto-generated method stub
+		// We check if the update has a message and the message has text
+		if (update.hasMessage() && update.getMessage().hasText()) {
+			// Set variables
+			String user_first_name = update.getMessage().getChat()
+					.getFirstName();
+			String user_last_name = update.getMessage().getChat().getLastName();
+			long user_id = update.getMessage().getChat().getId();
+			String message_text = update.getMessage().getText();
+			long chat_id = update.getMessage().getChatId();
+			String answer = EmojiParser
+					.parseToUnicode("Here is a smile emoji: :smile:\n\n Here is alien emoji: :alien:");
+			SendMessage message = new SendMessage() // Create a message object
+													// object
+					.setChatId(chat_id).setText(answer);
+			log(user_first_name, user_last_name, Long.toString(user_id),
+					message_text, answer);
+			try {
+				sendMessage(message); // Sending our message object to user
+			} catch (TelegramApiException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void lesson3(Update update) {
+		// TODO Auto-generated method stub
+		// We check if the update has a message and the message has text
+		if (update.hasMessage() && update.getMessage().hasText()) {
+			// Set variables
+			String user_first_name = update.getMessage().getChat()
+					.getFirstName();
+			String user_last_name = update.getMessage().getChat().getLastName();
+			String user_username = update.getMessage().getChat().getUserName();
+			long user_id = update.getMessage().getChat().getId();
+			String message_text = update.getMessage().getText();
+			long chat_id = update.getMessage().getChatId();
+			String answer = message_text;
+			SendMessage message = new SendMessage() // Create a message object
+													// object
+					.setChatId(chat_id).setText(answer);
+			log(user_first_name, user_last_name, Long.toString(user_id),
+					message_text, answer);
+			try {
+				sendMessage(message); // Sending our message object to user
+			} catch (TelegramApiException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void log(String first_name, String last_name, String user_id,
+			String txt, String bot_answer) {
+		System.out.println("\n ----------------------------");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Date date = new Date();
+		System.out.println(dateFormat.format(date));
+		System.out.println("Message from " + first_name + " " + last_name
+				+ ". (id = " + user_id + ") \n Text - " + txt);
+		System.out.println("Bot answer: \n Text - " + bot_answer);
+	}
+
+	private void lesson2(Update update) {
+		// TODO Auto-generated method stub
+		// We check if the update has a message and the message has text
+		if (update.hasMessage()) {
+			Message message = update.getMessage();
+			long chat_id = message.getChatId();
+
+			if (message.hasText()) {
+				// Set variables
+				String message_text = message.getText();
+				if (message_text.equals("/start")) {
+					SendMessage msg = new SendMessage() // Create a message
+														// object object
+							.setChatId(chat_id).setText(message_text);
+					try {
+						sendMessage(msg); // Sending our message object to
+											// user
+					} catch (TelegramApiException e) {
+						e.printStackTrace();
+					}
+				} else if (message_text.equals("/pic")) {
+					SendPhoto msg = new SendPhoto()
+							.setChatId(chat_id)
+							.setPhoto(
+									"AgADAgAD6qcxGwnPsUgOp7-MvnQ8GecvSw0ABGvTl7ObQNPNX7UEAAEC")
+							.setCaption("Photo");
+					try {
+						sendPhoto(msg); // Call method to send the photo
+					} catch (TelegramApiException e) {
+						e.printStackTrace();
+					}
+				} else if (message_text.equals("/markup")) {
+					SendMessage msg = new SendMessage()
+							// Create a message
+							// object object
+							.setChatId(chat_id)
+							.setText("Here is your keyboard");
+					// Create ReplyKeyboardMarkup object
+					ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+					// Create the keyboard (list of keyboard rows)
+					List<KeyboardRow> keyboard = new ArrayList<>();
+					// Create a keyboard row
+					KeyboardRow row = new KeyboardRow();
+					// Set each button, you can also use KeyboardButton objects
+					// if
+					// you need something else than text
+					row.add("Row 1 Button 1");
+					row.add("Row 1 Button 2");
+					row.add("Row 1 Button 3");
+					// Add the first row to the keyboard
+					keyboard.add(row);
+					// Create another keyboard row
+					row = new KeyboardRow();
+					// Set each button for the second line
+					row.add("Row 2 Button 1");
+					row.add("Row 2 Button 2");
+					row.add("Row 2 Button 3");
+					// Add the second row to the keyboard
+					keyboard.add(row);
+					// Set the keyboard to the markup
+					keyboardMarkup.setKeyboard(keyboard);
+					// Add it to the message
+					msg.setReplyMarkup(keyboardMarkup);
+					try {
+						sendMessage(msg); // Sending our message object to
+											// user
+					} catch (TelegramApiException e) {
+						e.printStackTrace();
+					}
+				} else if (message_text.equals("Row 1 Button 1")) {
+					SendPhoto msg = new SendPhoto()
+							.setChatId(chat_id)
+							.setPhoto(
+									"AgADAgAD6qcxGwnPsUgOp7-MvnQ8GecvSw0ABGvTl7ObQNPNX7UEAAEC")
+							.setCaption("Photo");
+
+					try {
+						sendPhoto(msg); // Call method to send the photo
+					} catch (TelegramApiException e) {
+						e.printStackTrace();
+					}
+				} else if (message_text.equals("/hide")) {
+					SendMessage msg = new SendMessage().setChatId(chat_id)
+							.setText("Keyboard hidden");
+					ReplyKeyboardRemove keyboardMarkup = new ReplyKeyboardRemove();
+					msg.setReplyMarkup(keyboardMarkup);
+					try {
+						sendMessage(msg); // Call method to send the photo
+					} catch (TelegramApiException e) {
+						e.printStackTrace();
+					}
+				} else {
+					SendMessage msg = new SendMessage() // Create a message
+														// object object
+							.setChatId(chat_id).setText("Unknown command");
+					try {
+						sendMessage(msg); // Sending our message object to
+											// user
+					} catch (TelegramApiException e) {
+						e.printStackTrace();
+					}
+				}
+			} else if (message.hasPhoto()) {
+				// Message contains photo
+				// Set variables
+
+				List<PhotoSize> photos = message.getPhoto();
+				PhotoSize orElse = photos
+						.stream()
+						.sorted(Comparator.comparing(PhotoSize::getFileSize)
+								.reversed()).findFirst().orElse(null);
+
+				String f_id = orElse.getFileId();
+
+				int f_width = orElse.getWidth();
+				int f_height = orElse.getHeight();
+
+				String caption = "file_id: " + f_id + "\nwidth: "
+						+ Integer.toString(f_width) + "\nheight: "
+						+ Integer.toString(f_height);
+				SendPhoto msg = new SendPhoto().setChatId(chat_id)
+						.setPhoto(f_id).setCaption(caption);
+				try {
+					sendPhoto(msg); // Call method to send the message
+				} catch (TelegramApiException e) {
+					e.printStackTrace();
+				}
+
+			}
+		}
+	}
+
+	private void lesson1(Update update) {
+		// TODO Auto-generated method stub
+		// We check if the update has a message and the message has text
+		if (update.hasMessage() && update.getMessage().hasText()) {
+			// Set variables
+			String message_text = update.getMessage().getText();
+			long chat_id = update.getMessage().getChatId();
+
+			SendMessage message = new SendMessage() // Create a message object
+													// object
+					.setChatId(chat_id).setText(message_text);
+			try {
+				sendMessage(message); // Sending our message object to user
+			} catch (TelegramApiException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public String getBotUsername() {
+		// TODO Auto-generated method stub
+		return BOT.getUserName();
+	}
+
+	@Override
+	public String getBotToken() {
+		// TODO Auto-generated method stub
+		return BOT.getToken();
+	}
+}
